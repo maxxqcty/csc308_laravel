@@ -1,0 +1,231 @@
+// create_departments_table.php
+Schema::create('departments', function (Blueprint $table) {
+    $table->id();
+    $table->string('name')->unique();
+    $table->string('code', 10)->unique(); // e.g., 'CS', 'ENG'
+    $table->string('office_location')->nullable();
+    $table->timestamps();
+});
+
+// create_programs_table.php
+Schema::create('programs', function (Blueprint $table) {
+    $table->id();
+    $table->string('program_code')->unique(); // e.g., 'BSCS'
+    $table->string('name');
+    $table->enum('degree_type', ['Associate', 'Bachelor', 'Master', 'PhD']);
+    $table->unsignedInteger('total_credits_required');
+    $table->foreignId('department_id')->constrained()->restrictOnDelete();
+    $table->timestamps();
+});
+
+// create_courses_table.php
+Schema::create('courses', function (Blueprint $table) {
+    $table->id();
+    $table->string('course_code')->unique(); // e.g., 'CS101'
+    $table->string('title');
+    $table->text('description')->nullable();
+    $table->unsignedInteger('credits');
+    $table->foreignId('department_id')->constrained()->restrictOnDelete();
+    $table->timestamps();
+});
+
+// create_course_prerequisites_table.php
+Schema::create('course_prerequisites', function (Blueprint $table) {
+    $table->id(); // Added an ID for easier management/indexing
+    
+    $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('prerequisite_id')->constrained('courses')->cascadeOnDelete();
+    
+    // 1. Minimum Grade Requirement
+    $table->decimal('min_grade_point', 3, 2)->default(2.00); 
+    
+    // 2. The Logic "Group" (The Secret Sauce)
+    // If two rows have the same 'course_id' and the same 'group_identifier',
+    // it means (Course A AND Course B) are required.
+    // If they have DIFFERENT identifiers, it means (Course A OR Course B) is required.
+    $table->unsignedTinyInteger('group_identifier')->default(1); 
+    
+    // 3. Timing Logic
+    // If true, the student can take the prerequisite in the SAME semester (Corequisite).
+    // If false, they MUST have completed it in a previous semester.
+    $table->boolean('is_concurrent_allowed')->default(false);
+
+    // Primary key change: Since we added an ID and might have complex groups, 
+    // a unique constraint on the pair is safer than a composite primary key.
+    $table->unique(['course_id', 'prerequisite_id'], 'unique_pre_req');
+    $table->timestamps();
+});
+// create_course_program_table.php (Pivot)
+Schema::create('course_program', function (Blueprint $table) {
+    $table->foreignId('program_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+    $table->boolean('is_core')->default(true); // Core vs Elective
+    $table->unsignedTinyInteger('recommended_semester')->nullable();
+    $table->primary(['program_id', 'course_id']);
+});
+
+// create_students_table.php
+Schema::create('students', function (Blueprint $table) {
+    $table->id();
+    $table->string('university_id')->unique();
+    $table->string('email')->unique();
+    $table->string('first_name');
+    $table->string('last_name');
+    $table->date('date_of_birth');
+    $table->date('admission_date');
+    $table->enum('status', ['active', 'on_leave', 'graduated', 'expelled'])->default('active');
+    $table->foreignId('program_id')->constrained()->restrictOnDelete(); // Primary program
+    $table->timestamps();
+    $table->softDeletes();
+});
+
+// create_instructors_table.php
+Schema::create('instructors', function (Blueprint $table) {
+    $table->id();
+    $table->string('employee_id')->unique();
+    $table->string('email')->unique();
+    $table->string('first_name');
+    $table->string('last_name');
+    $table->foreignId('department_id')->constrained()->restrictOnDelete();
+    $table->timestamps();
+    $table->softDeletes();
+});
+
+// create_rooms_table.php
+Schema::create('rooms', function (Blueprint $table) {
+    $table->id();
+    $table->string('building');
+    $table->string('room_number');
+    $table->unsignedInteger('capacity');
+    $table->unique(['building', 'room_number']);
+});
+
+// create_time_slots_table.php
+Schema::create('time_slots', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedTinyInteger('day_of_week'); // 1-7
+    $table->time('start_time');
+    $table->time('end_time');
+    $table->unique(['day_of_week', 'start_time', 'end_time']);
+});
+
+// create_terms_table.php
+Schema::create('terms', function (Blueprint $table) {
+    $table->id();
+    $table->string('name'); // e.g., 'Fall 2026'
+    $table->date('start_date');
+    $table->date('end_date');
+    $table->timestamps();
+});
+
+// create_course_offerings_table.php
+Schema::create('course_offerings', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('course_id')->constrained()->restrictOnDelete();
+    $table->foreignId('term_id')->constrained()->restrictOnDelete();
+    $table->string('section_code'); // e.g., 'A1'
+    $table->unsignedInteger('max_capacity');
+    $table->enum('delivery_mode', ['In-Person', 'Online', 'Hybrid']);
+    $table->unique(['course_id', 'term_id', 'section_code']);
+    $table->timestamps();
+});
+
+// create_offering_schedules_table.php
+Schema::create('offering_schedules', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('course_offering_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('time_slot_id')->constrained()->restrictOnDelete();
+    $table->foreignId('room_id')->constrained()->restrictOnDelete();
+    $table->foreignId('instructor_id')->constrained()->restrictOnDelete();
+
+    // The Logic Guard: 
+    // No room can be used twice at the same time
+    $table->unique(['time_slot_id', 'room_id'], 'uq_room_time');
+    // No instructor can be in two rooms at the same time
+    $table->unique(['time_slot_id', 'instructor_id'], 'uq_instructor_time');
+});
+
+
+// New: create_grade_scales_table.php
+Schema::create('grade_scales', function (Blueprint $table) {
+    $table->id();
+    $table->string('letter_grade', 3); // 'A+', 'B', etc.
+    $table->decimal('point_value', 4, 2); // 4.00, 3.00
+    $table->boolean('is_passing')->default(true);
+    $table->timestamps();
+});
+
+// create_enrollments_table.php
+Schema::create('enrollments', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+        $table->foreignId('course_offering_id')->constrained()->cascadeOnDelete();
+        
+        // 1. New: Foreign key to the standardized Grade Scale
+        // We keep this nullable because grades aren't assigned until the term ends
+        $table->foreignId('grade_scale_id')->nullable()->constrained('grade_scales')->nullOnDelete();
+
+        // 2. Snapshotting credits (Good job keeping this!)
+        $table->unsignedInteger('credits_at_enrollment'); 
+        
+        // 3. Status tracking
+        $table->enum('status', [
+            'enrolled', 
+            'dropped', 
+            'withdrawn', 
+            'completed', 
+            'failed', 
+            'incomplete', // Added: common for students who need more time
+            'audit'
+        ])->default('enrolled');
+
+        // 4. Manual Overrides (Optional but recommended)
+        // Sometimes a professor gives a "Pass" regardless of points
+        $table->boolean('is_manual_grade')->default(false);
+        $table->text('internal_notes')->nullable(); // For administrative record-keeping
+        
+        $table->unique(['student_id', 'course_offering_id']);
+        $table->timestamps();
+    });
+
+Schema::create('sections', function (Blueprint $table) {
+    $table->id();
+    $table->string('name'); // e.g., "Section 1-A"
+    $table->foreignId('program_id')->constrained();
+    $table->foreignId('term_id')->constrained();
+    $table->timestamps();
+});
+
+Schema::create('section_student', function (Blueprint $table) {
+    $table->foreignId('section_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+    $table->primary(['section_id', 'student_id']);
+});
+
+Schema::create('section_offering', function (Blueprint $table) {
+    $table->foreignId('section_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('course_offering_id')->constrained()->cascadeOnDelete();
+    $table->primary(['section_id', 'course_offering_id']);
+});
+
+// New: create_program_student_table.php
+Schema::create('program_student', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('program_id')->constrained()->cascadeOnDelete();
+    $table->enum('type', ['major', 'minor', 'concentration'])->default('major');
+    $table->date('start_date');
+    $table->date('end_date')->nullable(); // If null, they are currently in this program
+    $table->boolean('is_primary')->default(true);
+    $table->timestamps();
+});
+
+// New: create_course_equivalencies_table.php
+Schema::create('course_equivalencies', function (Blueprint $table) {
+    $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('equivalent_course_id')->constrained('courses')->cascadeOnDelete();
+    $table->primary(['course_id', 'equivalent_course_id']);
+    
+    // Notes why they are equivalent (e.g., "Curriculum update 2026")
+    $table->string('reason')->nullable(); 
+});

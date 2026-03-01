@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('date_of_birth');
             $table->date('admission_date');
             $table->enum('status', ['active', 'on_leave', 'graduated', 'expelled'])->default('active');
-            $table->foreignId('program_id')->constrained()->restrictOnDelete(); // Primary program
+            // $table->foreignId('program_id')->constrained()->restrictOnDelete(); // Primary program
             $table->timestamps();
             $table->softDeletes();
         });

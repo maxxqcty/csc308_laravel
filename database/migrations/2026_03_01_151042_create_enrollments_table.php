@@ -12,19 +12,35 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('enrollments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('course_offering_id')->constrained()->cascadeOnDelete();
-            
-            // Snapshotting credits ensures GPA stays accurate if course credit values change later
-            $table->unsignedInteger('credits_at_enrollment'); 
-            
-            $table->enum('status', ['enrolled', 'dropped', 'withdrawn', 'completed', 'failed', 'audit']);
-            $table->string('final_grade', 3)->nullable(); // e.g., 'A-', 'B+'
-            $table->decimal('grade_points', 4, 2)->nullable(); // e.g., 3.70
-            
-            $table->unique(['student_id', 'course_offering_id']);
-            $table->timestamps();
+          $table->id();
+        $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+        $table->foreignId('course_offering_id')->constrained()->cascadeOnDelete();
+        
+        // 1. New: Foreign key to the standardized Grade Scale
+        // We keep this nullable because grades aren't assigned until the term ends
+        $table->foreignId('grade_scale_id')->nullable()->constrained('grade_scales')->nullOnDelete();
+
+        // 2. Snapshotting credits (Good job keeping this!)
+        $table->unsignedInteger('credits_at_enrollment'); 
+        
+        // 3. Status tracking
+        $table->enum('status', [
+            'enrolled', 
+            'dropped', 
+            'withdrawn', 
+            'completed', 
+            'failed', 
+            'incomplete', // Added: common for students who need more time
+            'audit'
+        ])->default('enrolled');
+
+        // 4. Manual Overrides (Optional but recommended)
+        // Sometimes a professor gives a "Pass" regardless of points
+        $table->boolean('is_manual_grade')->default(false);
+        $table->text('internal_notes')->nullable(); // For administrative record-keeping
+        
+        $table->unique(['student_id', 'course_offering_id']);
+        $table->timestamps();
         });
     }
 
