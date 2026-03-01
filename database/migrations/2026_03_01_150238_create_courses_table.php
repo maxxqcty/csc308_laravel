@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subjects', function (Blueprint $table) {
-             $table->id();
-
-            $table->string('code')->unique(); // e.g., CS101
+        Schema::create('courses', function (Blueprint $table) {
+            $table->id();
+            $table->string('course_code')->unique(); // e.g., 'CS101'
             $table->string('title');
             $table->text('description')->nullable();
-            $table->unsignedTinyInteger('units'); // 1–5 typically
-            $table->string('department');
-            $table->boolean('is_active')->default(true);
-
+            $table->unsignedInteger('credits');
+            $table->foreignId('department_id')->constrained()->restrictOnDelete();
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subjects');
+        Schema::dropIfExists('courses');
     }
 };

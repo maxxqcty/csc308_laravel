@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-          $table->string('student_number')->unique();
+            $table->string('university_id')->unique();
+            $table->string('email')->unique();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('email')->unique();
-            $table->string('program'); // e.g., BSCS
-            $table->year('year_level'); // academic year level
-            $table->string('status')->default('active'); // active, graduated, dropped
-
+            $table->date('date_of_birth');
+            $table->date('admission_date');
+            $table->enum('status', ['active', 'on_leave', 'graduated', 'expelled'])->default('active');
+            $table->foreignId('program_id')->constrained()->restrictOnDelete(); // Primary program
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

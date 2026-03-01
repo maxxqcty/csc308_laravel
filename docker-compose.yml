@@ -22,8 +22,8 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: laraveluser        # auto-login username
-      PMA_PASSWORD: laravelpass    # auto-login password
+      PMA_USER: root    # auto-login username
+      PMA_PASSWORD: rootpassword  # auto-login password
       UPLOAD_LIMIT: 300M
     ports:
       - "8080:80"
