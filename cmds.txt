@@ -1,0 +1,140 @@
+php artisan make:migration create_<name>_table
+
+
+//example migration file
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('posts', function (Blueprint $table) {
+            $table->id(); // Primary Key
+            
+            // Relationship: links to 'id' on 'users' table
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            
+            $table->string('title'); // Post title
+            $table->string('slug')->unique(); // URL-friendly version of title
+            $table->text('body'); // The main content
+            
+            $table->string('image')->nullable(); // Optional featured image path
+            $table->boolean('is_published')->default(false); // Status toggle
+            $table->timestamp('published_at')->nullable(); // Date of publication
+            
+            $table->timestamps(); // created_at and updated_at
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('posts');
+    }
+};
+
+
+php artisan make:model Post
+
+
+//sample post model file
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Post extends Model
+{
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'user_id',
+        'title',
+        'slug',
+        'body',
+        'image',
+        'is_published',
+        'published_at',
+    ];
+
+    /**
+     * Attribute casting.
+     */
+    protected $casts = [
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
+    ];
+
+    /**
+     * Relationship: Post belongs to a User.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+// lifehaxx
+php artisan make:model ModelName -m
+
+
+//standard controller
+php artisan make:controller UserController
+
+// resource controller
+php artisan make:controller UserController --resource
+
+//api-controller
+php artisan make:controller UserController --api
+
+
+
+
+
+Here are the answers to all 29 questions based on the Chapter 1 PDF:
+
+1. *Emerging Technology*
+2. *Technological Evolution*
+3. *Techno* (from Greek tekhnologia)
+4. *Evolution*
+5. *Artificial Intelligence (AI)*
+6. *Blockchain*
+7. *Internet of Things (IoT)*
+8. *First Industrial Revolution (IR 1.0)*
+9. *Second Industrial Revolution (IR 2.0)*
+10. *Third Industrial Revolution (IR 3.0)*
+11. *Fourth Industrial Revolution (IR 4.0)*
+12. *Klaus Schwab*
+13. *Primary Industry*
+14. *Secondary Industry*
+15. *Tertiary Industry*
+16. *Quaternary Industry*
+17. *Data*
+18. *Memory Devices*
+19. *Microprocessors*
+20. *Network*
+21. *Human-Machine Interaction (HMI)*
+22. *Human-Computer Interaction (HCI)*
+23. *Cognitive Psychology*
+24. *Cyber-Physical Systems*
+25. *Computer Numerical Control (CNC) Machines*
+26. *Internet*
+27. *Industrial Revolution (IR 1.0)* — the shift from rural to factory-based work
+28. *Field Programmable Gate Array (FPGA) / Programmable Logic Device*
+29. *Augmented Reality (AR)*
