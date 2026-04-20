@@ -9,4 +9,5 @@ Route::get('/', function () {
 
 
 // Route::resource('students', StudentController::class)->except(['create', 'store']);
-Route::resource('students', StudentController::class) -> except(['create', 'store']);
+Route::resource('students', StudentController::class);
+

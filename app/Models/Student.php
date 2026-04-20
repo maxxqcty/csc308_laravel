@@ -31,14 +31,14 @@ class Student extends Model
      }
 
 
-     public function getStatusAttribute() {
-        return match($this->attributes['status']) {
-            'active'=> 'Active',
-            'on_leave' => 'On Leave',
-            'graduated' => 'Graduated',
-            'expelled' => 'Expelled',
-            default => 'Unknown',
-        };
+    //  public function getStatusAttribute() {
+    //     return match($this->attributes['status']) {
+    //         'active'=> 'Active',
+    //         'on_leave' => 'On Leave',
+    //         'graduated' => 'Graduated',
+    //         'expelled' => 'Expelled',
+    //         default => 'Unknown',
+    //     };
        
-     }
+    //  }
 }

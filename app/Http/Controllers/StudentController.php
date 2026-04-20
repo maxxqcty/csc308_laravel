@@ -3,48 +3,98 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Student;
 
 class StudentController extends Controller
 {
-    //
-    
-    public function index() {
+    /**
+     * Display a listing of students
+     */
+    public function index()
+    {
+        $students = Student::all();
 
-    $students = Student::all();
-        return view('students.index', ['students' => $students]);
+        return view('students.index', [
+            'students' => $students
+        ]);
     }
 
-
-    public function show(Student $Student) {
-        return view('students.show', ['student' => $Student]);
+    /**
+     * Show create form
+     */
+    public function create()
+    {
+        return view('students.create');
     }
 
+    /**
+     * Store new student
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'university_id' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'admission_date' => 'required|date',
+            'status' => 'required|in:active,on_leave,graduated,expelled',
+        ]);
 
-    public function edit(Student $Student) {
-        return view('students.edit', ['student' => $Student]);
+        $student = Student::create($validatedData);
+
+        return redirect()->route('students.index', $student);
     }
 
-    public function update(Request $request, Student $Student) {
-
-            $validatedData = $request->validate([
-                'university_id' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'date_of_birth' => 'required|date',
-                'admission_date' => 'required|date',
-                'status' => 'required|in:active,on_leave,graduated,expelled',
-            ]);
-        $Student->update($validatedData);
-
-        return redirect()->route('students.show', ['student' => $Student]);
+    /**
+     * Show single student
+     */
+    public function show(Student $student)
+    {
+        return view('students.show', [
+            'student' => $student
+        ]);
     }
 
-    public function destroy(Student $Student) {
-        $Student->delete();
-        return redirect()->route('students.index')  
-        ->with('success', 'Student deleted successfully.');
+    /**
+     * Show edit form
+     */
+    public function edit(Student $student)
+    {
+        return view('students.edit', [
+            'student' => $student
+        ]);
+    }
+
+    /**
+     * Update student
+     */
+    public function update(Request $request, Student $student)
+    {
+        $validatedData = $request->validate([
+            'university_id' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'admission_date' => 'required|date',
+            'status' => 'required|in:active,on_leave,graduated,expelled',
+        ]);
+
+        $student->update($validatedData);
+
+        return redirect()->route('students.index');
+    }
+
+    /**
+     * Delete student
+     */
+    public function destroy(Student $student)
+    {
+        $student->delete();
+
+        return redirect()->route('students.index')
+            ->with('success', 'Student deleted successfully.');
     }
 }
