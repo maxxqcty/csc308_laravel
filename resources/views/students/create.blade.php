@@ -1,52 +1,61 @@
-<form action="{{ route('students.store') }}" method="POST">
-    @csrf
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Student</title>
+</head>
+<body>
 
-    <div>
-        <label>University ID:</label><br>
-        <input type="text" name="university_id" required>
-    </div>
-    <br>
+    <h1>Create Student</h1>
 
-    <div>
-        <label>Email:</label><br>
-        <input type="email" name="email" required>
-    </div>
-    <br>
+    <form action="{{ route('students.store') }}" method="POST">
+        @csrf
 
-    <div>
-        <label>First Name:</label><br>
-        <input type="text" name="first_name" required>
-    </div>
-    <br>
+        <p>
+            <label for="university_id">University ID:</label><br>
+            <input type="text" id="university_id" name="university_id" required>
+        </p>
 
-    <div>
-        <label>Last Name:</label><br>
-        <input type="text" name="last_name" required>
-    </div>
-    <br>
+        <p>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required>
+        </p>
 
-    <div>
-        <label>Date of Birth:</label><br>
-        <input type="date" name="date_of_birth" required>
-    </div>
-    <br>
+        <p>
+            <label for="first_name">First Name:</label><br>
+            <input type="text" id="first_name" name="first_name" required>
+        </p>
 
-    <div>
-        <label>Admission Date:</label><br>
-        <input type="date" name="admission_date" required>
-    </div>
-    <br>
+        <p>
+            <label for="last_name">Last Name:</label><br>
+            <input type="text" id="last_name" name="last_name" required>
+        </p>
 
-    <div>
-        <label>Status:</label><br>
-        <select name="status" required>
-            <option value="active">Active</option>
-            <option value="on_leave">On Leave</option>
-            <option value="graduated">Graduated</option>
-            <option value="expelled">Expelled</option>
-        </select>
-    </div>
-    <br>
+        <p>
+            <label for="date_of_birth">Date of Birth:</label><br>
+            <input type="date" id="date_of_birth" name="date_of_birth" required>
+        </p>
 
-    <button type="submit">Create Student</button>
-</form>
+        <p>
+            <label for="admission_date">Admission Date:</label><br>
+            <input type="date" id="admission_date" name="admission_date" required>
+        </p>
+
+        <p>
+            <label for="status">Status:</label><br>
+            <select id="status" name="status" required>
+                <option value="active">Active</option>
+                <option value="on_leave">On Leave</option>
+                <option value="graduated">Graduated</option>
+                <option value="expelled">Expelled</option>
+            </select>
+        </p>
+
+        <p>
+            <button type="submit">Create Student</button>
+        </p>
+
+    </form>
+
+</body>
+</html>

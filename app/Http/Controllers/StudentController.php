@@ -44,7 +44,7 @@ class StudentController extends Controller
 
         $student = Student::create($validatedData);
 
-        return redirect()->route('students.index', $student);
+        return redirect()->route('students.index');
     }
 
     /**
@@ -70,23 +70,24 @@ class StudentController extends Controller
     /**
      * Update student
      */
-    public function update(Request $request, Student $student)
-    {
-        $validatedData = $request->validate([
-            'university_id' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
-            'admission_date' => 'required|date',
-            'status' => 'required|in:active,on_leave,graduated,expelled',
-        ]);
+   public function update(Request $request, Student $student)
+{
+    $validatedData = $request->validate([
+        'university_id' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'first_name' => 'required|string|max:255',
+        'last_name' => 'required|string|max:255',
+        'date_of_birth' => 'required|date',
+        'admission_date' => 'required|date',
+        'status' => 'required|in:active,on_leave,graduated,expelled',
+    ]);
 
-        $student->update($validatedData);
+    $student->update($validatedData);
 
-        return redirect()->route('students.index');
-    }
-
+    return redirect()
+        ->route('students.index', $student)
+        ->with('success', 'Student updated successfully.');
+}
     /**
      * Delete student
      */
