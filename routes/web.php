@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AnimalController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -9,5 +9,5 @@ Route::get('/', function () {
 
 
 // Route::resource('students', StudentController::class)->except(['create', 'store']);
-Route::resource('students', StudentController::class);
+Route::resource('animals', AnimalController::class);
 
